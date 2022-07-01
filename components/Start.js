@@ -7,6 +7,8 @@ import {
   TextInput,
   Pressable,
   TouchableOpacity,
+  Platform,
+  KeyboardAvoidingView,
 } from "react-native";
 
 import image from "../assets/Background.png";
@@ -19,7 +21,7 @@ export default function Start(props) {
   const colors = {
     black: "#090C08",
     purple: "#474056",
-    grey: "#8A95A5",
+    gray: "#8A95A5",
     green: "#B9C6AE",
   };
 
@@ -45,23 +47,32 @@ export default function Start(props) {
           </View>
 
           {/* Allow the user to choose between different background colors */}
-          <Text style={styles.paragraphText}>Choose background color</Text>
+          <Text
+            style={styles.paragraphText}
+            accessibilityHint="Lets you choose among four options for your background color."
+          >
+            Choose background color
+          </Text>
           <View style={styles.colorPalette}>
             <TouchableOpacity
               style={styles.color1}
               onPress={() => setColor(colors.black)}
+              accessibilityLabel="black"
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.color1, styles.color2]}
               onPress={() => setColor(colors.purple)}
+              accessibilityLabel="purple"
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.color1, styles.color3]}
-              onPress={() => setColor(colors.grey)}
+              onPress={() => setColor(colors.gray)}
+              accessibilityLabel="gray"
             ></TouchableOpacity>
             <TouchableOpacity
               style={[styles.color1, styles.color4]}
               onPress={() => setColor(colors.green)}
+              accessibilityLabel="green"
             ></TouchableOpacity>
           </View>
 
@@ -79,6 +90,10 @@ export default function Start(props) {
           </Pressable>
         </View>
       </ImageBackground>
+      {/* Ensures that the input field won’t be hidden beneath the keyboard */}
+      {Platform.OS === "android" ? (
+        <KeyboardAvoidingView behavior="height" />
+      ) : null}
     </View>
   );
 }
