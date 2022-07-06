@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, Platform, KeyboardAvoidingView, Text } from "react-native";
-import { GiftedChat, Bubble } from "react-native-gifted-chat";
+import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import { db } from "../config/firebase";
 import {
   collection,
@@ -11,12 +11,14 @@ import {
 } from "firebase/firestore";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import NetInfo from "@react-native-community/netinfo";
 
 export default function Chat(props) {
   let { name, bgColor } = props.route.params;
   const [messages, setMessages] = useState([]);
   const [uid, setUid] = useState("");
   const [loggedInText, setText] = useState("");
+  const [isOnline, setOnline] = useState();
 
   const auth = getAuth();
   // creating a references to messages collection
@@ -26,45 +28,50 @@ export default function Chat(props) {
   useEffect(() => {
     props.navigation.setOptions({ title: name });
 
-    // WORKING WITH FIRESTORE
-    // Fetch collection and query on it
-    const messagesQuery = query(
-      messagesCollection,
-      orderBy("createdAt", "desc")
-    );
+    // If user is online, retrieve messages from firebase store, if offline use AsyncStorage
+    NetInfo.fetch().then((connection) => {
+      setOnline(connection.isConnected);
+      if (!connection.isConnected) {
+        // WORKING WITH ASYNCSTORAGE: get messages for asyncStorage and set the state
+        getMessages();
+      } else {
+        // WORKING WITH FIRESTORE
+        // Fetch collection and query on it
+        const messagesQuery = query(
+          messagesCollection,
+          orderBy("createdAt", "desc")
+        );
 
-    // listen to authentication events
-    const authUnsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
-        signInAnonymously(auth);
+        // listen to authentication events
+        const authUnsubscribe = onAuthStateChanged(auth, (user) => {
+          if (!user) {
+            signInAnonymously(auth);
+          }
+
+          // update user state with user data
+          setUid(user.uid);
+          setText(`User ${user.uid}`);
+          console.log(user.uid);
+        });
+
+        // listen for collection changes (Update state based on database snapshot)
+        let stopListeningToSnapshots = onSnapshot(
+          messagesQuery,
+          onCollectionUpdate
+        );
+
+        //In here code will run once the component will unmount
+        return () => {
+          // stop listening for changes
+          stopListeningToSnapshots();
+          // stop listening to authentication
+          authUnsubscribe();
+        };
       }
-
-      // update user state with user data
-      setUid(user.uid);
-      setText(`User ${user.uid}`);
-      console.log(user.uid);
-      console.log(loggedInText);
     });
+  }, [isOnline]);
 
-    // listen for collection changes (Update state based on database snapshot)
-    const stopListeningToSnapshots = onSnapshot(
-      messagesQuery,
-      onCollectionUpdate
-    );
-
-    // WORKING WITH ASYNCSTORAGE
-    getMessages();
-
-    //In here code will run once the component will unmount
-    return () => {
-      // stop listening for changes
-      stopListeningToSnapshots();
-      // stop listening to authentication
-      authUnsubscribe();
-    };
-  }, []);
-
-  // WORKING WITH FIRESTORE
+  // WORKING WITH FIRESTORE //
 
   // GET messages from firestore collection(snapshot) and update state
   const onCollectionUpdate = (querySnapshot) => {
@@ -94,7 +101,7 @@ export default function Chat(props) {
     });
   };
 
-  //Append new messages to the State and add to firestore collection (addMessage)
+  //Append new messages to the State and add to firestore collection (addMessage) and asyncStorage (saveMessages)
   const onSend = (newMessages = []) => {
     setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
     //Last message appended to collection
@@ -103,15 +110,14 @@ export default function Chat(props) {
     saveMessages(messages);
   };
 
-  // WORKING WITH ASYNCSTORAGE (local storage)
+  // WORKING WITH ASYNCSTORAGE (local storage) //
   // GET messages from asyncStorage
   const getMessages = async () => {
-    let messages = "";
+    let mesg = "";
     try {
-      messages = (await AsyncStorage.getItem("messages")) || [];
-      this.setState({
-        messages: JSON.parse(messages),
-      });
+      mesg = (await AsyncStorage.getItem("messages")) || [];
+      setMessages(JSON.parse(mesg));
+      console.log("Messages fetched from Async Storage", mesg);
     } catch (error) {
       console.log(error.message);
     }
@@ -161,6 +167,14 @@ export default function Chat(props) {
     />
   );
 
+  const renderInputToolbar = (props) => {
+    if (!isOnline) {
+      return <></>;
+    } else {
+      return <InputToolbar {...props} />;
+    }
+  };
+
   return (
     <View
       style={{
@@ -182,6 +196,7 @@ export default function Chat(props) {
         showUserAvatar={true}
         showAvatarForEveryMessage={true}
         renderBubble={renderBubble}
+        renderInputToolbar={renderInputToolbar}
       />
       {/* Ensures that the input field won’t be hidden beneath the keyboard */}
       {Platform.OS === "android" ? (
