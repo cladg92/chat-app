@@ -10,6 +10,7 @@ import {
   orderBy,
 } from "firebase/firestore";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function Chat(props) {
   let { name, bgColor } = props.route.params;
@@ -25,6 +26,7 @@ export default function Chat(props) {
   useEffect(() => {
     props.navigation.setOptions({ title: name });
 
+    // WORKING WITH FIRESTORE
     // Fetch collection and query on it
     const messagesQuery = query(
       messagesCollection,
@@ -37,18 +39,21 @@ export default function Chat(props) {
         signInAnonymously(auth);
       }
 
-      //update user state with currently active user data
+      // update user state with user data
       setUid(user.uid);
       setText(`User ${user.uid}`);
       console.log(user.uid);
       console.log(loggedInText);
     });
 
-    // listen for collection changes
+    // listen for collection changes (Update state based on database snapshot)
     const stopListeningToSnapshots = onSnapshot(
       messagesQuery,
       onCollectionUpdate
     );
+
+    // WORKING WITH ASYNCSTORAGE
+    getMessages();
 
     //In here code will run once the component will unmount
     return () => {
@@ -59,13 +64,9 @@ export default function Chat(props) {
     };
   }, []);
 
-  //Append new messages to the State and add to collection
-  const onSend = (newMessages = []) => {
-    setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
-    addMessage(newMessages[0]);
-  };
+  // WORKING WITH FIRESTORE
 
-  // Update state based on database snapshot
+  // GET messages from firestore collection(snapshot) and update state
   const onCollectionUpdate = (querySnapshot) => {
     let messages = [];
     // go through each document
@@ -79,10 +80,11 @@ export default function Chat(props) {
         user: data.user,
       });
     });
+    //Update state
     setMessages(messages);
   };
 
-  // Add document(message) to collection
+  // ADD/PUT document(message) to firestore collection
   const addMessage = (message) => {
     addDoc(messagesCollection, {
       _id: message._id,
@@ -90,6 +92,46 @@ export default function Chat(props) {
       text: message.text,
       user: message.user,
     });
+  };
+
+  //Append new messages to the State and add to firestore collection (addMessage)
+  const onSend = (newMessages = []) => {
+    setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
+    //Last message appended to collection
+    addMessage(newMessages[0]);
+    //Save messages to asyncStorage
+    saveMessages(messages);
+  };
+
+  // WORKING WITH ASYNCSTORAGE (local storage)
+  // GET messages from asyncStorage
+  const getMessages = async () => {
+    let messages = "";
+    try {
+      messages = (await AsyncStorage.getItem("messages")) || [];
+      this.setState({
+        messages: JSON.parse(messages),
+      });
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  // ADD messages to asyncStorage
+  const saveMessages = async () => {
+    try {
+      await AsyncStorage.setItem("messages", JSON.stringify(messages));
+    } catch (error) {
+      console.log(error.message);
+    }
+  };
+  // DELETE messages from asyncStorage and state
+  const deleteMessages = async () => {
+    try {
+      await AsyncStorage.removeItem("messages");
+      setMessages([]);
+    } catch (error) {
+      console.log(error.message);
+    }
   };
 
   // style message bubble
