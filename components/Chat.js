@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { View, Platform, KeyboardAvoidingView, Text } from "react-native";
+import {
+  View,
+  Platform,
+  KeyboardAvoidingView,
+  Text,
+  Button,
+} from "react-native";
 import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import { db } from "../config/firebase";
 import {
@@ -12,6 +18,9 @@ import {
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
+// Communication features
+import * as Speech from "expo-speech";
+import CustomActions from "./CustomActions";
 
 export default function Chat(props) {
   let { name, bgColor } = props.route.params;
@@ -23,6 +32,12 @@ export default function Chat(props) {
   const auth = getAuth();
   // creating a references to messages collection
   const messagesCollection = collection(db, "messages");
+
+  // Text-to-speech feature
+  const speak = () => {
+    const thingToSay = messages[0].text;
+    Speech.speak(thingToSay);
+  };
 
   //Run once after component mount
   useEffect(() => {
@@ -86,7 +101,6 @@ export default function Chat(props) {
         user: doc.data().user,
       });
     });
-    console.log(mess);
     //Update state
     setMessages(mess);
     saveMessages(mess);
@@ -125,7 +139,7 @@ export default function Chat(props) {
   const saveMessages = async (messages) => {
     try {
       await AsyncStorage.setItem("messages", JSON.stringify(messages));
-      console.log("Messages: ", messages);
+      //console.log("Messages: ", messages);
     } catch (error) {
       console.log(error.message);
     }
@@ -175,6 +189,10 @@ export default function Chat(props) {
     }
   };
 
+  const renderCustomActions = (props) => {
+    return <CustomActions {...props} />;
+  };
+
   return (
     <View
       style={{
@@ -197,7 +215,9 @@ export default function Chat(props) {
         showAvatarForEveryMessage={true}
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
+        renderActions={renderCustomActions}
       />
+      <Button title="Press to hear last message" onPress={speak} />
       {/* Ensures that the input field won’t be hidden beneath the keyboard */}
       {Platform.OS === "android" ? (
         <KeyboardAvoidingView behavior="height" />
