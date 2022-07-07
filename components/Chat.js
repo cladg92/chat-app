@@ -75,20 +75,21 @@ export default function Chat(props) {
 
   // GET messages from firestore collection(snapshot) and update state
   const onCollectionUpdate = (querySnapshot) => {
-    let messages = [];
+    let mess = [];
     // go through each document
     querySnapshot.forEach((doc) => {
       // get the QueryDocumentSnapshot's data
-      var data = doc.data();
-      messages.push({
-        _id: data._id,
-        createdAt: data.createdAt.toDate(),
-        text: data.text,
-        user: data.user,
+      mess.push({
+        _id: doc.data()._id,
+        createdAt: doc.data().createdAt.toDate(),
+        text: doc.data().text,
+        user: doc.data().user,
       });
     });
+    console.log(mess);
     //Update state
-    setMessages(messages);
+    setMessages(mess);
+    saveMessages(mess);
   };
 
   // ADD/PUT document(message) to firestore collection
@@ -106,8 +107,6 @@ export default function Chat(props) {
     setMessages((prevMessages) => GiftedChat.append(prevMessages, newMessages));
     //Last message appended to collection
     addMessage(newMessages[0]);
-    //Save messages to asyncStorage
-    saveMessages(messages);
   };
 
   // WORKING WITH ASYNCSTORAGE (local storage) //
@@ -123,9 +122,10 @@ export default function Chat(props) {
     }
   };
   // ADD messages to asyncStorage
-  const saveMessages = async () => {
+  const saveMessages = async (messages) => {
     try {
       await AsyncStorage.setItem("messages", JSON.stringify(messages));
+      console.log("Messages: ", messages);
     } catch (error) {
       console.log(error.message);
     }
