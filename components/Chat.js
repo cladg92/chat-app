@@ -21,6 +21,7 @@ import NetInfo from "@react-native-community/netinfo";
 // Communication features
 import * as Speech from "expo-speech";
 import CustomActions from "./CustomActions";
+import MapView from "react-native-maps";
 
 export default function Chat(props) {
   let { name, bgColor } = props.route.params;
@@ -99,10 +100,13 @@ export default function Chat(props) {
         createdAt: doc.data().createdAt.toDate(),
         text: doc.data().text,
         user: doc.data().user,
+        location: doc.data().location,
+        image: doc.data().image,
       });
     });
     //Update state
     setMessages(mess);
+    //Update asyncStorage
     saveMessages(mess);
   };
 
@@ -113,6 +117,8 @@ export default function Chat(props) {
       createdAt: message.createdAt,
       text: message.text,
       user: message.user,
+      image: message.image || null,
+      location: message.location || null,
     });
   };
 
@@ -188,9 +194,27 @@ export default function Chat(props) {
       return <InputToolbar {...props} />;
     }
   };
-
+  // to render ActionSheet with options
   const renderCustomActions = (props) => {
     return <CustomActions {...props} />;
+  };
+  // to render MapView if mess contains location data
+  const renderCustomView = (props) => {
+    const { currentMessage } = props;
+    if (currentMessage.location) {
+      return (
+        <MapView
+          style={{ width: 150, height: 100, borderRadius: 13, margin: 3 }}
+          region={{
+            latitude: currentMessage.location.latitude,
+            longitude: currentMessage.location.longitude,
+            latitudeDelta: 0.0922,
+            longitudeDelta: 0.0421,
+          }}
+        />
+      );
+    }
+    return null;
   };
 
   return (
@@ -216,6 +240,7 @@ export default function Chat(props) {
         renderBubble={renderBubble}
         renderInputToolbar={renderInputToolbar}
         renderActions={renderCustomActions}
+        renderCustomView={renderCustomView}
       />
       <Button title="Press to hear last message" onPress={speak} />
       {/* Ensures that the input field won’t be hidden beneath the keyboard */}
