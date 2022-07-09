@@ -1,10 +1,14 @@
 import PropTypes from "prop-types";
-import React from "react";
-import { TouchableOpacity, View, Text, StyleSheet } from "react-native";
+import React, { useState } from "react";
 import {
-  connectActionSheet,
-  useActionSheet,
-} from "@expo/react-native-action-sheet";
+  TouchableOpacity,
+  View,
+  Text,
+  StyleSheet,
+  ViewPropTypes,
+} from "react-native";
+
+import { connectActionSheet } from "@expo/react-native-action-sheet";
 
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
@@ -13,9 +17,14 @@ import * as Permissions from "expo-permissions";
 import * as ImagePicker from "expo-image-picker";
 
 // Action sheet with options
-const CustomActions = (props) => {
+class CustomAction extends React.Component {
+  state = {
+    image: null,
+    location: null,
+  };
+
   //Function to upload images to Firebase
-  const uploadImageFetch = async (uri) => {
+  uploadImageFetch = async (uri) => {
     // fetch from given URI & transform data in blob
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
@@ -39,7 +48,7 @@ const CustomActions = (props) => {
     const storageRef = ref(storage, `images/${imageName}`);
     console.log(storageRef);
     // store blob content in storage
-    uploadBytes(storageRef, blob).then((snapshot) => {
+    await uploadBytes(storageRef, blob).then((snapshot) => {
       console.log("Uploaded a blob or file!");
     });
     // get image URL from storage
@@ -49,19 +58,19 @@ const CustomActions = (props) => {
 
   // CAMERA FEATURES
   //
-  const pickImage = async (props) => {
-    // ask user for permission to CAMERA and set state to selected image
+  imagePicker = async () => {
+    // expo permission
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     try {
       if (status === "granted") {
-        let result = await ImagePicker.launchImageLibraryAsync({
+        // pick image
+        const result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: "Images",
         }).catch((error) => console.log(error));
+        // canceled process
         if (!result.cancelled) {
-          // get the image URL and set it as the image of the message object
-          //console.log(result.uri);
-          const imageUrl = await uploadImageFetch(result.uri);
-          props.onSend({ image: imageUrl });
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -69,18 +78,17 @@ const CustomActions = (props) => {
     }
   };
   //
-  const takePhoto = async () => {
-    // ask user for permission to CAMERA and set state to selected image
+  takePhoto = async () => {
     const { status } = await Permissions.askAsync(Permissions.CAMERA);
     try {
       if (status === "granted") {
-        let result = await ImagePicker.launchCameraAsync({
+        const result = await ImagePicker.launchCameraAsync({
           mediaTypes: "Images",
         }).catch((error) => console.log(error));
+
         if (!result.cancelled) {
-          // get the image URL and set it as the image of the message object
-          const imageUrl = await uploadImageFetch(result.uri);
-          props.onSend({ image: imageUrl });
+          const imageUrl = await this.uploadImageFetch(result.uri);
+          this.props.onSend({ image: imageUrl });
         }
       }
     } catch (error) {
@@ -88,16 +96,17 @@ const CustomActions = (props) => {
     }
   };
 
-  const { showActionSheetWithOptions } = useActionSheet();
-  const onActionPress = () => {
+  // ACTION SHEET
+
+  onActionPress = () => {
     const options = [
-      "Choose From Library",
+      "Choose Image From Library",
       "Take Picture",
       "Send Location",
       "Cancel",
     ];
     const cancelButtonIndex = options.length - 1;
-    showActionSheetWithOptions(
+    this.props.showActionSheetWithOptions(
       {
         options,
         cancelButtonIndex,
@@ -105,27 +114,34 @@ const CustomActions = (props) => {
       async (buttonIndex) => {
         switch (buttonIndex) {
           case 0:
-            pickImage();
-            return;
+            console.log("user wants to pick an image");
+            return this.imagePicker();
           case 1:
-            takePhoto();
-            return;
+            console.log("user wants to take a photo");
+            return this.takePhoto();
           case 2:
-            alert("user wants to get their location");
-          default:
+            console.log("user wants to get their location");
         }
       }
     );
   };
 
-  return (
-    <TouchableOpacity style={styles.container} onPress={onActionPress}>
-      <View style={[styles.wrapper, props.wrapperStyle]}>
-        <Text style={[styles.iconText, props.iconTextStyle]}>+</Text>
-      </View>
-    </TouchableOpacity>
-  );
-};
+  render() {
+    return (
+      <TouchableOpacity
+        accessible={true}
+        accessibilityLabel="More options"
+        accessibilityHint="Let’s you choose to send an image or your geolocation."
+        style={styles.container}
+        onPress={this.onActionPress}
+      >
+        <View style={[styles.wrapper, this.props.wrapperStyle]}>
+          <Text style={[styles.iconText, this.props.iconTextStyle]}>+</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -149,4 +165,28 @@ const styles = StyleSheet.create({
   },
 });
 
-export default connectActionSheet(CustomActions);
+CustomAction.contextTypes = {
+  actionSheet: PropTypes.func,
+};
+
+CustomAction.defaultProps = {
+  onSend: () => {},
+  options: {},
+  renderIcon: null,
+  containerStyle: {},
+  wrapperStyle: {},
+  iconTextStyle: {},
+};
+
+CustomAction.propTypes = {
+  onSend: PropTypes.func,
+  options: PropTypes.object,
+  renderIcon: PropTypes.func,
+  containerStyle: ViewPropTypes.style,
+  wrapperStyle: ViewPropTypes.style,
+  iconTextStyle: Text.propTypes.style,
+};
+
+const CustomActions = connectActionSheet(CustomAction);
+
+export default CustomActions;

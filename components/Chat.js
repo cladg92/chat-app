@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Platform,
@@ -20,8 +20,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 // Communication features
 import * as Speech from "expo-speech";
-import CustomActions from "./CustomActions";
 import MapView from "react-native-maps";
+import CustomActions from "./CustomActions.js";
+import { ActionSheetProvider } from "@expo/react-native-action-sheet";
 
 export default function Chat(props) {
   let { name, bgColor } = props.route.params;
@@ -115,7 +116,7 @@ export default function Chat(props) {
     addDoc(messagesCollection, {
       _id: message._id,
       createdAt: message.createdAt,
-      text: message.text,
+      text: message.text || "",
       user: message.user,
       image: message.image || null,
       location: message.location || null,
@@ -218,35 +219,38 @@ export default function Chat(props) {
   };
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: bgColor,
-      }}
-    >
-      <Text>{loggedInText}</Text>
-      {/* Chat UI */}
-      <GiftedChat
-        messages={messages}
-        onSend={onSend}
-        user={{
-          _id: uid,
-          name: name,
-          avatar:
-            "http://www.hidoctor.ir/wp-content/uploads/2014/02/Model-lebas-parastar-24.jpg",
+    <ActionSheetProvider>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: bgColor,
         }}
-        showUserAvatar={true}
-        showAvatarForEveryMessage={true}
-        renderBubble={renderBubble}
-        renderInputToolbar={renderInputToolbar}
-        renderActions={renderCustomActions}
-        renderCustomView={renderCustomView}
-      />
-      <Button title="Press to hear last message" onPress={speak} />
-      {/* Ensures that the input field won’t be hidden beneath the keyboard */}
-      {Platform.OS === "android" ? (
-        <KeyboardAvoidingView behavior="height" />
-      ) : null}
-    </View>
+      >
+        <Text>{loggedInText}</Text>
+        {/* Chat UI */}
+        <GiftedChat
+          messages={messages}
+          onSend={onSend}
+          user={{
+            _id: uid,
+            name: name,
+            avatar:
+              "http://www.hidoctor.ir/wp-content/uploads/2014/02/Model-lebas-parastar-24.jpg",
+          }}
+          showUserAvatar={true}
+          showAvatarForEveryMessage={true}
+          renderBubble={renderBubble}
+          renderInputToolbar={renderInputToolbar}
+          renderActions={renderCustomActions}
+          renderCustomView={renderCustomView}
+          renderUsernameOnMessage={true}
+        />
+        <Button title="Press to hear last message" onPress={speak} />
+        {/* Ensures that the input field won’t be hidden beneath the keyboard */}
+        {Platform.OS === "android" ? (
+          <KeyboardAvoidingView behavior="height" />
+        ) : null}
+      </View>
+    </ActionSheetProvider>
   );
 }
