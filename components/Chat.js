@@ -19,7 +19,7 @@ import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import NetInfo from "@react-native-community/netinfo";
 // Communication features
-import * as Speech from "expo-speech";
+//import * as Speech from "expo-speech";
 import MapView from "react-native-maps";
 import CustomActions from "./CustomActions.js";
 import { ActionSheetProvider } from "@expo/react-native-action-sheet";
@@ -36,10 +36,10 @@ export default function Chat(props) {
   const messagesCollection = collection(db, "messages");
 
   // Text-to-speech feature
-  const speak = () => {
+  /*const speak = () => {
     const thingToSay = messages[0].text;
     Speech.speak(thingToSay);
-  };
+  };*/
 
   //Run once after component mount
   useEffect(() => {
@@ -245,7 +245,7 @@ export default function Chat(props) {
           renderCustomView={renderCustomView}
           renderUsernameOnMessage={true}
         />
-        <Button title="Press to hear last message" onPress={speak} />
+        {/*<Button title="Press to hear last message" onPress={speak} />*/}
         {/* Ensures that the input field won’t be hidden beneath the keyboard */}
         {Platform.OS === "android" ? (
           <KeyboardAvoidingView behavior="height" />
