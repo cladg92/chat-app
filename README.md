@@ -17,7 +17,7 @@ Chat app for mobile devices built using React Native. The app provides users wit
 
 - Install expo by running `npm install expo-cli --global in the terminal`.
 - Next, you’ll need the Expo app for your phone to run your project on. Search for the Expo app in the relevant app store for your device (iOS or Android). Once you’ve found the Expo app, download it onto your device.
-- Head over to the Expo signup page [https://expo.dev/] and follow the instructions to create an account. Once that’s done, you should be able to log in to Expo from your browser and mobile app.
+- Head over to the [Expo signup page](https://expo.dev/) and follow the instructions to create an account. Once that’s done, you should be able to log in to Expo from your browser and mobile app.
 - Clone the repository running `git clone https://github.com/cladg92/chat-app.git` in the terminal.
 - Install dependencies with `npm i`.
 - Navigate to the root folder and run `npm start` or `expo start`.
@@ -27,7 +27,7 @@ Chat app for mobile devices built using React Native. The app provides users wit
 
 Follow these steps if you want to create a database of your own:
 
-- Head over to Google Firebase [https://firebase.google.com/] and click Sign in in the upper-right corner. Use your existing Google credentials to sign in and create a new Firebase account.
+- Head over to [Google Firebase](https://firebase.google.com/) and click Sign in in the upper-right corner. Use your existing Google credentials to sign in and create a new Firebase account.
 - Next head to the Firebase console and create a new project (Create Project).
 - Once on the Google Firebase dashboard of your project, click Develop from the menu on the left-hand side and, from the additional menu that appears, select Cloud Firestore, then select Create Database.
 - Follow the instructions to create a new database.
