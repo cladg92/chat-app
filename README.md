@@ -15,7 +15,7 @@ Chat app for mobile devices built using React Native. The app provides users wit
 
 ### App
 
-- Install expo by running `npm install expo-cli --global in the terminal`.
+- Install expo by running `npm install expo-cli --global` in the terminal.
 - Next, you’ll need the Expo app for your phone to run your project on. Search for the Expo app in the relevant app store for your device (iOS or Android). Once you’ve found the Expo app, download it onto your device.
 - Head over to the [Expo signup page](https://expo.dev/) and follow the instructions to create an account. Once that’s done, you should be able to log in to Expo from your browser and mobile app.
 - Clone the repository running `git clone https://github.com/cladg92/chat-app.git` in the terminal.
