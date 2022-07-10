@@ -27,10 +27,10 @@ Chat app for mobile devices built using React Native. The app provides users wit
 
 Follow these steps if you want to create a database of your own:
 
-- Head over to [Google Firebase](https://firebase.google.com/) and click Sign in in the upper-right corner. Use your existing Google credentials to sign in and create a new Firebase account.
-- Next head to the Firebase console and create a new project (Create Project).
-- Once on the Google Firebase dashboard of your project, click Develop from the menu on the left-hand side and, from the additional menu that appears, select Cloud Firestore, then select Create Database.
+- Head over to [Google Firebase](https://firebase.google.com/) and use your existing Google credentials to sign in and create a new Firebase account.
+- Next head to the Firebase console and create a new project (**Create Project**).
+- Once on the Google Firebase dashboard of your project, click **Develop** from the menu on the left-hand side and, from the additional menu that appears, select **Cloud Firestore**, then select **Create Database**.
 - Follow the instructions to create a new database.
 - Create a new collection called "messages".
-- Under Project settings, you’ll find a section called Your apps, which is where you can generate configurations for different platforms. Click the Firestore for Web button (it may be shown as the </> icon). This will open a new screen asking you to register your web application, which will connect to the Cloud Firestore database you just created.
-- Fill in a name for your chat application, then click Register to generate the configuration code. Copy the contents of the `firebaseConfig` object and paste them in the firebase.js file.
+- Under **Project settings**, you’ll find a section called **Your apps**, which is where you can generate configurations for different platforms. Click the **Firestore for Web** button (it may be shown as the </> icon). This will open a new screen asking you to register your web application, which will connect to the Cloud Firestore database you just created.
+- Fill in a name for your chat application, then click **Register** to generate the configuration code. Copy the contents of the `firebaseConfig` object and paste them in the firebase.js file.
