@@ -1,8 +1,10 @@
 # chat-app
 
+## Description
+
 Chat app for mobile devices built using React Native. The app provides users with a chat interface and options to share images and their location.
 
-## Features
+### Features
 
 - A page where users can enter their name and choose a background color for the chat screen
   before joining the chat.
