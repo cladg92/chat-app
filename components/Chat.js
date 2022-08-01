@@ -28,7 +28,6 @@ export default function Chat(props) {
   let { name, bgColor } = props.route.params;
   const [messages, setMessages] = useState([]);
   const [uid, setUid] = useState("");
-  const [loggedInText, setText] = useState("");
   const [isOnline, setOnline] = useState();
 
   const auth = getAuth();
@@ -67,7 +66,6 @@ export default function Chat(props) {
 
           // update user state with user data
           setUid(user.uid);
-          setText(`User ${user.uid}`);
           console.log(user.uid);
         });
 
@@ -226,7 +224,6 @@ export default function Chat(props) {
           backgroundColor: bgColor,
         }}
       >
-        <Text>{loggedInText}</Text>
         {/* Chat UI */}
         <GiftedChat
           messages={messages}
