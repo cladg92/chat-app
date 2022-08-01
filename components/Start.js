@@ -33,7 +33,7 @@ export default function Start(props) {
       }}
     >
       <ImageBackground source={image} resizeMode="cover" style={styles.image}>
-        <Text style={styles.titleText}>App title</Text>
+        <Text style={styles.titleText}>Chat app</Text>
 
         {/* Secondary view */}
         <View style={styles.view}>

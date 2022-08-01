@@ -59,7 +59,7 @@ class CustomAction extends React.Component {
   //
   imagePicker = async () => {
     // expo permission
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     try {
       if (status === "granted") {
         // pick image
@@ -78,7 +78,7 @@ class CustomAction extends React.Component {
   };
   //
   takePhoto = async () => {
-    const { status } = await Permissions.askAsync(Permissions.CAMERA);
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
     try {
       if (status === "granted") {
         const result = await ImagePicker.launchCameraAsync({
@@ -98,9 +98,7 @@ class CustomAction extends React.Component {
   // GEOLOCATION FEATURES
   //
   getLocation = async () => {
-    const { status } = await Permissions.askAsync(
-      Permissions.LOCATION_FOREGROUND
-    );
+    const { status } = await Location.requestForegroundPermissionsAsync();
     try {
       if (status === "granted") {
         let result = await Location.getCurrentPositionAsync({});
